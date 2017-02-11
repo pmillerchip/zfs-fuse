@@ -113,7 +113,10 @@ static int zfsfuse_do_locking(int in_child)
 
 void do_daemon(const char *pidfile)
 {
-	chdir("/");
+	if (chdir("/") == -1) {
+		cmn_err(CE_WARN, "Cannot chdir to root directory, aborting.", pidfile);
+    exit(1);
+  }
 	if (pidfile) {
 		struct stat dummy;
 		if (0 == stat(pidfile, &dummy)) {

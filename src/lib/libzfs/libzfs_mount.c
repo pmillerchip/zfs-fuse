@@ -553,24 +553,26 @@ static int get_fsid(char *mountpoint) {
     if (!f) return 100; // should never happen
     int fsid = 0;
     while (!feof(f)) {
-	char buff[2048];
-	fgets(buff,2048,f);
-	char *s = strstr(buff,"fsid=");
-	if (s) {
-	    int t = atoi(s+5);
-	    if (t > fsid) fsid = t;
-	    // maybe it's the fsid for the current mount point...
-	    s = strchr(buff,9); // field separator
-	    if (!s) {
-		fclose(f);
-		return 100; // should never happen
-	    }
-	    *s = 0;
-	    if (!strcmp(mountpoint,buff)) {
-		fclose(f);
-		return t;
-	    }
-	}
+      char buff[2048];
+      if (fgets(buff,2048,f) != NULL)
+      {
+        char *s = strstr(buff,"fsid=");
+        if (s) {
+          int t = atoi(s+5);
+          if (t > fsid) fsid = t;
+          // maybe it's the fsid for the current mount point...
+          s = strchr(buff,9); // field separator
+          if (!s) {
+            fclose(f);
+            return 100; // should never happen
+          }
+          *s = 0;
+          if (!strcmp(mountpoint,buff)) {
+            fclose(f);
+            return t;
+          }
+        }
+      }
     }
     fclose(f);
     // that's a new fsid then...
@@ -642,17 +644,18 @@ static sa_share_t zfsfuse_findshare(sa_handle_t h, char *mshare) {
 	strncpy(s,"\\040",4); // replaces the space with \040 (encoded space)
     }
     while (!feof(f)) {
-	fgets(buff,1024,f);
-	char *s = strchr(buff,9);
-	if (!s) continue;
-	*s = 0; // keep only the 1st field, path
+      if (fgets(buff,1024,f) != NULL) {
+        char *s = strchr(buff,9);
+        if (!s) continue;
+        *s = 0; // keep only the 1st field, path
 
-	if (!strcmp(buff,share)) {
-	    *s = 9; // restore the tab
-	    // we return the 1st share found on this mountpoint
-	    fclose(f);
-	    return buff;
-	}
+        if (!strcmp(buff,share)) {
+          *s = 9; // restore the tab
+          // we return the 1st share found on this mountpoint
+          fclose(f);
+          return buff;
+        }
+      }
     }
     fclose(f);
     return NULL;

@@ -790,9 +790,7 @@ ddi_strtoul(const char *hw_serial, char **nptr, int base, unsigned long *result)
 static int
 umem_out_of_memory(void)
 {
-	char errmsg[] = "out of memory -- generating core dump\n";
-
-	write(fileno(stderr), errmsg, sizeof (errmsg));
+	fprintf(stderr, "out of memory -- generating core dump\n");
 	abort();
 	return (0);
 }

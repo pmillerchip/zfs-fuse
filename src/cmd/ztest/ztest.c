@@ -2575,14 +2575,16 @@ grow_vdev(vdev_t *vd, void *arg)
 		return (vd);
 
 	fsize = lseek(fd, 0, SEEK_END);
-	(void) ftruncate(fd, *newsize);
-
-	if (zopt_verbose >= 6) {
-		(void) printf("%s grew from %lu to %lu bytes\n",
-		    vd->vdev_path, (ulong_t)fsize, (ulong_t)*newsize);
-	}
+  vdev_t* ret = vd;
+	if (ftruncate(fd, *newsize) == 0) {
+    ret = NULL;
+    if (zopt_verbose >= 6) {
+      (void) printf("%s grew from %lu to %lu bytes\n",
+          vd->vdev_path, (ulong_t)fsize, (ulong_t)*newsize);
+    }
+  }
 	(void) close(fd);
-	return (NULL);
+	return (ret);
 }
 
 /*
@@ -5391,7 +5393,7 @@ main(int argc, char **argv)
 	process_options(argc, argv);
 
 	/* Override location of ztest.cache */
-	(void) asprintf((char **)&spa_config_path, "%s/ztest.cache", zopt_dir);
+	if (asprintf((char **)&spa_config_path, "%s/ztest.cache", zopt_dir) == -1) return(1);
 
 	/*
 	 * Blow away any existing copy of ztest.cache

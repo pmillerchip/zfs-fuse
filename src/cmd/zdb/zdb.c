@@ -2353,12 +2353,12 @@ zdb_dump_gbh(void *buf, int flags)
 	zdb_dump_indirect((blkptr_t *)buf, SPA_GBH_NBLKPTRS, flags);
 }
 
-static void
+static ssize_t
 zdb_dump_block_raw(void *buf, uint64_t size, int flags)
 {
 	if (flags & ZDB_FLAG_BSWAP)
 		byteswap_uint64_array(buf, size);
-	(void) write(1, buf, size);
+	return write(1, buf, size);
 }
 
 static void
